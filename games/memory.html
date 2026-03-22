@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memory Match</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif;color:#fff;padding:20px}
+  h1{font-size:22px;margin-bottom:8px;background:linear-gradient(90deg,#a64eff,#4ecdc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  #info{display:flex;gap:28px;margin-bottom:18px;font-size:14px;color:rgba(255,255,255,0.45)}
+  #info span{color:#a64eff;font-weight:700;font-size:18px}
+  #grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:440px;width:100%}
+  .card{aspect-ratio:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:36px;transition:transform 0.15s ease,background 0.2s;user-select:none}
+  .card:hover{background:rgba(166,78,255,0.15);border-color:rgba(166,78,255,0.4)}
+  .card.flipped{background:rgba(166,78,255,0.15);border-color:rgba(166,78,255,0.5);transform:scale(1.06);box-shadow:0 0 20px rgba(166,78,255,0.25)}
+  .card.matched{background:rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.4);cursor:default;box-shadow:0 0 20px rgba(0,212,255,0.2);animation:matchPop 0.3s ease}
+  @keyframes matchPop{0%{transform:scale(1.06)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+  #overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+  .box{text-align:center;background:rgba(10,10,26,0.95);border:1px solid rgba(166,78,255,0.4);border-radius:14px;padding:30px 50px}
+  .box h2{font-size:28px;margin-bottom:8px;background:linear-gradient(90deg,#a64eff,#4ecdc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .box p{color:rgba(255,255,255,0.45);margin-bottom:18px;font-size:13px}
+  .box button{padding:11px 30px;background:linear-gradient(90deg,#a64eff,#4ecdc4);border:none;border-radius:999px;font-weight:700;font-size:14px;color:#000;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>🃏 Memory Match</h1>
+<div id="info">Moves: <span id="moves">0</span> &nbsp;|&nbsp; Pairs: <span id="pairs">0</span> / 8</div>
+<div id="grid"></div>
+
+<div id="overlay">
+  <div class="box">
+    <h2>🃏 Memory Match</h2>
+    <p>Find all matching pairs of emojis.<br>Click two cards to reveal them!</p>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+</div>
+
+<script>
+const EMOJIS=['🚀','🎮','💎','🔥','⚡','🌈','🦊','🎯'];
+let cards=[],flipped=[],matched=0,moves=0,locked=false;
+
+function startGame(){
+  document.getElementById('overlay').style.display='none';
+  matched=0; moves=0; flipped=[]; locked=false;
+  document.getElementById('moves').textContent=0;
+  document.getElementById('pairs').textContent=0;
+  const deck=[...EMOJIS,...EMOJIS].sort(()=>Math.random()-0.5);
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  cards=deck.map((emoji,i)=>{
+    const el=document.createElement('div');
+    el.className='card'; el.dataset.i=i; el.dataset.emoji=emoji;
+    el.addEventListener('click',()=>flip(el));
+    grid.appendChild(el);
+    return el;
+  });
+}
+
+function flip(el){
+  if(locked||el.classList.contains('flipped')||el.classList.contains('matched')) return;
+  el.textContent=el.dataset.emoji;
+  el.classList.add('flipped');
+  flipped.push(el);
+  if(flipped.length===2) check();
+}
+
+function check(){
+  locked=true; moves++;
+  document.getElementById('moves').textContent=moves;
+  const [a,b]=flipped;
+  if(a.dataset.emoji===b.dataset.emoji){
+    a.classList.replace('flipped','matched');
+    b.classList.replace('flipped','matched');
+    matched++;
+    document.getElementById('pairs').textContent=matched;
+    flipped=[]; locked=false;
+    if(matched===8) setTimeout(win,500);
+  } else {
+    setTimeout(()=>{
+      a.classList.remove('flipped'); a.textContent='';
+      b.classList.remove('flipped'); b.textContent='';
+      flipped=[]; locked=false;
+    },900);
+  }
+}
+
+function reportScore(s){
+  try{ window.parent.postMessage({type:'gpScore',gameId:'memory',score:s},'*'); }catch(e){}
+}
+function win(){
+  // Score: bonus points for finishing — fewer moves = higher score
+  var calculatedScore = Math.max(0, 200 - moves * 5);
+  reportScore(calculatedScore);
+  const ol=document.getElementById('overlay');
+  ol.style.display='flex';
+  ol.querySelector('.box').innerHTML=`<h2>🎉 You Won!</h2><p>Completed in <strong>${moves} moves</strong>! Score: <strong>${calculatedScore}</strong></p><button onclick="startGame()">Play Again</button>`;
+}
+</script>
+</body>
+</html>

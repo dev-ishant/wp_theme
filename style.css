@@ -1,0 +1,74 @@
+/* 
+Author: Ishant Thakur
+version: 1.0
+description: Random theme for my personal website
+*/
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    padding-top: 72px;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+/* Old header styles removed — navbar styles are now in header.php */
+.hero {
+    height: 90vh;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(78, 205, 196, 0.1) 50%, rgba(255, 107, 107, 0.1) 100%); /* Subtle tech gradient overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #ffffff;
+    position: relative;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(0, 212, 255, 0.05) 0%, rgba(78, 205, 196, 0.05) 50%, rgba(255, 107, 107, 0.05) 100%);
+    z-index: -1;
+}
+
+.hero-content h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.hero-content p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    background: rgb(3, 3, 3);
+    color: black;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.features {
+    padding: 50px;
+    text-align: center;
+}
+
+.feature-box {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.feature {
+    background: #eee;
+    padding: 20px;
+    border-radius: 10px;
+}
